@@ -5,7 +5,6 @@ use warnings;
 use CGI;
 use HTML::Entities;
 use JSON;
-use Perl::Version;
 
 my $q = CGI->new;
 
@@ -19,7 +18,7 @@ my $regex_str = $q->param('regex');
 my $replacement = $q->param('replacement');
 my $data;
 
-if (length($regex_str) <= 0)
+if (!$regex_str)
 {
 	$data = { "success" => JSON::false, "message" => "No regex to test" };
 }
@@ -131,8 +130,12 @@ else
 			. HTML::Entities::encode($input)
 			. "</td>";
 
-		$html .= "\t\t\t<td style=\"text-align:center;\">";
-		$html .= ($input =~ $regex);
+		$html .= "\t\t\t<td>";
+		$html .= ($input =~ $regex) ? "true" : "false";
+		$html .= "<br/>";
+		$html .= "\$`=<code>" . HTML::Entities::encode($`) . "</code><br/>";
+		$html .= "\$&amp;=<code>" . HTML::Entities::encode($&) . "</code><br/>";
+		$html .= "\$&#x27;=<code>" . HTML::Entities::encode($') . "</code><br/>";
 		$html .= "</td>";
 
 		$html .= "\t\t\t<td>";
@@ -144,9 +147,9 @@ else
 		$html .= "</td>";
 
 		$html .= "\t\t\t<td>";
-		# this works locally, but not on dotCloud.  why????
-		#my $replaced = $input =~ s/$regex/$replacement/r;
-		#$html .= HTML::Entities::encode($replaced);
+		my $replaced = $input;
+		$replaced =~ s/$regex/$replacement/;
+		$html .= HTML::Entities::encode($replaced);
 		$html .= "</td>";
 
 		$html .= "\t\t</tr>";
@@ -166,12 +169,12 @@ else
 		. "</table>\n";
 
 
-	$data = { "success" => JSON::true, "html" => '<div class="alert alert-warning">Perl support is pretty raw.  If you are a Perl hacker, I could really use some help!  (<a href="http://www.regexplanet.com/support/api.html">instructions</a>, <a href="https://github.com/fileformat/regexplanet-perl">code on GitHub</a>)</div>' . $html};
+	$data = { "success" => JSON::true, "html" => '<div class="alert alert-warning">Perl support is pretty raw.  If you are a Perl hacker, I could really use some help!  (<a href="http://www.regexplanet.com/support/api.html">instructions</a>, <a href="https://github.com/fileformat/regexplanet-perl-cgi">code on GitHub</a>)</div>' . $html};
 }
 
 my $body = to_json($data, {'utf8' => 1, 'pretty'=> 1});
 my $callback = $q->param('callback');
-if (length($callback))
+if ($callback && length($callback))
 {
 	$body = $callback . "(" . $body . ")"
 }

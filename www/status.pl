@@ -4,7 +4,8 @@ use strict;
 use warnings;
 use CGI;
 use JSON;
-use Perl::Version;
+# not available by default, how do I install it?
+#use Perl::Version;
 
 my $q = CGI->new;
 
@@ -18,7 +19,7 @@ my $data;
 
 $data = {
 	'$^O' => $^O,
-	'$^V' => Perl::Version->new($^V)->stringify,
+#	'$^V' => Perl::Version->new($^V)->stringify,
 	'$]' => $],
 	'path_translated()' => $q->path_translated(),
 	'remote_addr()' => $q->remote_addr(),
@@ -27,12 +28,12 @@ $data = {
 	'server_software()' => $q->server_software(),
 	'server_port ()' => $q->server_port(),
 	"success" => JSON::true,
-	'version' => Perl::Version->new($^V)->stringify,
+#	'version' => Perl::Version->new($^V)->stringify,
 	};
 
 my $body = to_json($data, {'utf8' => 1, 'pretty'=> 0});
 my $callback = $q->param('callback');
-if (length($callback))
+if ($callback && length($callback))
 {
 	$body = $callback . "(" . $body . ")"
 }
