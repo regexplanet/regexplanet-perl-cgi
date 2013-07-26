@@ -19,7 +19,7 @@ my $data;
 
 $data = {
 	'$^O' => $^O,
-#	'$^V' => Perl::Version->new($^V)->stringify,
+	'$^V' => $^V,
 	'$]' => $],
 	'path_translated()' => $q->path_translated(),
 	'remote_addr()' => $q->remote_addr(),
@@ -28,7 +28,8 @@ $data = {
 	'server_software()' => $q->server_software(),
 	'server_port ()' => $q->server_port(),
 	"success" => JSON::true,
-#	'version' => Perl::Version->new($^V)->stringify,
+#LATER:	'version' => Perl::Version->new($^V)->stringify,
+	'version' => $],
 	};
 
 my $body = to_json($data, {'utf8' => 1, 'pretty'=> 0});

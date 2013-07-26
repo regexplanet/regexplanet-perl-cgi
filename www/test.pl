@@ -105,7 +105,8 @@ else
 		. "\t\t<tr>\n"
 		. "\t\t\t<th style=\"text-align:center;\">Test</th>\n"
 		. "\t\t\t<th>Input</th>\n"
-		. "\t\t\t<th style=\"text-align:center;\">=~</th>\n"
+		. "\t\t\t<th style=\"text-align:center;\">\$var = \$input =~ \$regex</th>\n"
+		. "\t\t\t<th style=\"text-align:center;\">\@var = \$input =~ \$regex</th>\n"
 		. "\t\t\t<th>split</th>\n"
 		. "\t\t\t<th>=~ s/\$regex/\$input/r</th>\n"
 		. "\t\t</tr>\n"
@@ -131,7 +132,7 @@ else
 			. "</td>";
 
 		$html .= "\t\t\t<td>";
-		$html .= ($input =~ $regex) ? "true" : "false";
+		$html .= ($input =~ $regex) ? "1" : "0";
 		$html .= "<br/>";
 		$html .= "\$`=<code>" . HTML::Entities::encode($`) . "</code><br/>";
 		$html .= "\$&amp;=<code>" . HTML::Entities::encode($&) . "</code><br/>";
@@ -139,10 +140,18 @@ else
 		$html .= "</td>";
 
 		$html .= "\t\t\t<td>";
+		my @results = $input =~ $regex;
+		for (my $resultLoop = 0; $resultLoop < scalar(@results); $resultLoop++)
+		{
+			$html .= "[$resultLoop]:&nbsp;<code>" . HTML::Entities::encode(@results[$resultLoop]) . "</code><br/>"
+		}
+		$html .= "</td>";
+
+		$html .= "\t\t\t<td>";
 		my @words = split $regex, $input;
 		for (my $wordLoop = 0; $wordLoop < scalar(@words); $wordLoop++)
 		{
-			$html .= "[$wordLoop]:&nbsp;" . HTML::Entities::encode($words[$wordLoop]) . "<br/>"
+			$html .= "[$wordLoop]:&nbsp;<code>" . HTML::Entities::encode(@words[$wordLoop]) . "</code><br/>"
 		}
 		$html .= "</td>";
 
