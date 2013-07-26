@@ -18,9 +18,9 @@ print $q->header(-type=>'text/plain; charset=utf-8',
 my $data;
 
 $data = {
-	'$^O' => $^O,
-	'$^V' => $^V,
-	'$]' => $],
+	'$^O' => "$^O",
+	'$^V' => "$^V",
+	'$]' => "$]",
 	'path_translated()' => $q->path_translated(),
 	'remote_addr()' => $q->remote_addr(),
 	'script_name()' => $q->script_name(),
@@ -29,7 +29,7 @@ $data = {
 	'server_port ()' => $q->server_port(),
 	"success" => JSON::true,
 #LATER:	'version' => Perl::Version->new($^V)->stringify,
-	'version' => $],
+	'version' => "$^V",
 	};
 
 my $body = to_json($data, {'utf8' => 1, 'pretty'=> 0});
