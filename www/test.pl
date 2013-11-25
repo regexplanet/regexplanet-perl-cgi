@@ -6,7 +6,7 @@ use HTML::Entities;
 use JSON;
 
 
-# Version 2013-08-11
+# Version 2013-11-20
 #
 # Handles display of whitespace (including newlines) within patterns and data, by
 # using <code> tags and using &nbsp; and <br>.
@@ -26,7 +26,8 @@ use JSON;
 #  The recommended syntax is $1 for the first capture group
 #  or $+{name} for a named capture group
 #
-# Embedded code is disallowed
+# Embedded code is disallowed. Also, the regex is not evaluated using the
+# string form of 'eval', so double-quotish interpolation will not happen.
 #
 # Error text for invalid regexes is displayed
 #
@@ -269,7 +270,11 @@ use JSON;
             my $replaced = $input;
             #$replaced =~ s/$regex/$replacement/  unless $exec_option_g;
             #$replaced =~ s/$regex/$replacement/g if     $exec_option_g;
-            eval '$replaced =~ s/$regex/' . escape_slashes($replacement) . '/' . $exec_option_g;
+            my $repl = escape_slashes($replacement);
+            #eval '$replaced =~ s/$regex/' . escape_slashes($replacement) . '/' . $exec_option_g;
+            $replaced =~ s/$regex/$repl/  unless $exec_option_g;
+            $replaced =~ s/$regex/$repl/g if     $exec_option_g;
+            #eval '$replaced =~ s/$regex/' . escape_slashes($replacement) . '/' . $exec_option_g;
             $html .= as_code($replaced);
             $html .= "</td>";
             $html .= "\t\t</tr>";
