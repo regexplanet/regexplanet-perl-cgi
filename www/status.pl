@@ -37,7 +37,8 @@ $data = {
 	'version' => "$^V",
 	};
 
-my $body = to_json($data, {'utf8' => 1, 'pretty'=> 0});
+#my $body = to_json($data, {'utf8' => 1, 'pretty'=> 0});
+my $body = JSON->new->utf8()->canonical()->encode($data);
 my $callback = $q->param('callback');
 if ($callback && length($callback))
 {
