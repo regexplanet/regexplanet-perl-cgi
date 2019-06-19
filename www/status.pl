@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use CGI;
+use DateTime;
 use JSON;
 # not available by default, how do I install it?
 #use Perl::Version;
@@ -21,6 +22,8 @@ $data = {
 	'$^O' => "$^O",
 	'$^V' => "$^V",
 	'$]' => "$]",
+	'commit' => $ENV{'COMMIT'},
+	'lastmod' => $ENV{'LASTMOD'},
 	'path_translated()' => $q->path_translated(),
 	'remote_addr()' => $q->remote_addr(),
 	'script_name()' => $q->script_name(),
@@ -29,6 +32,8 @@ $data = {
 	'server_port ()' => $q->server_port(),
 	"success" => JSON::true,
 #LATER:	'version' => Perl::Version->new($^V)->stringify,
+	'tech' => "Perl $^V",
+	'timestamp' => DateTime->now()->iso8601().'Z',
 	'version' => "$^V",
 	};
 

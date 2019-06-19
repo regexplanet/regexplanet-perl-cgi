@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+
 use strict;
 use warnings;
 use CGI;
@@ -11,11 +12,11 @@ use JSON;
 # Handles display of whitespace (including newlines) within patterns and data, by
 # using <code> tags and using &nbsp; and <br>.
 #
-# Global flag (/g) is honored. 
-#     $var = $input =~ /$regex/g 
+# Global flag (/g) is honored.
+#     $var = $input =~ /$regex/g
 #        This is executed, but only once. Realistically, if the global flag is
 #        being used the match would be done repeatedly in a loop
-#     @var = $input =~ /$regex/g 
+#     @var = $input =~ /$regex/g
 #        The /g flag makes this 'pluck all matches'
 #     $input =~ s/$regex/$replace/g
 #        The /g flag makes this do global replacement
@@ -39,20 +40,20 @@ use JSON;
 
 # main-line
     my $q = CGI->new;
-    
+
     print $q->header(-type=>'text/plain; charset=utf-8',
     'Access-Control-Allow-Origin' => '*',
     'Access-Control-Allow-Methods' => 'POST, GET',
     'Access-Control-Max-Age' => '604800'
     );
-    
+
     my $regex_str = $q->param('regex');
     my $replacement = $q->param('replacement');
     my $data;
     my $this_perl_version = $];
-    
+
     my $msg = 'Perl support is a work in progress<br>';
-    
+
     if (!$regex_str) {
         $data = { "success" => $JSON::false, "message" => "No regex to test" };
     } elsif ( has_embedded_code($regex_str) ) {
@@ -86,7 +87,7 @@ use JSON;
                 }
             }
         }
-        
+
         $regex_options = join('', sort( split(  //, $regex_options)));
         my $regex = '';
         eval {
@@ -102,7 +103,7 @@ use JSON;
         }
         my $regex_option_p = $regex_options =~ /p/;
         my $exec_option_g = $exec_options =~ /g/ ? 'g' : '';
-        
+
         if ($exec_options =~ /c/) {
             $msg .= "Option c is only relevant when using the same subject<br>"
                   . "string with different regexes. This test harness only <br>"
@@ -114,11 +115,11 @@ use JSON;
         if ($exec_option_g) {
             $msg .= "You have selected option g, so 'global' actions tested<br>";
         }
-        
-        
-        
+
+
+
         my $html = "<table class=\"table table-bordered table-striped\" style=\"width:auto;\">\n"
-        
+
         . "\t<tr>\n"
         . "\t\t<td>"
         . "Regular expression"
@@ -129,7 +130,7 @@ use JSON;
         . "\t</tr>\n"
         ;
 
-        
+
         $html .= "\t<tr>\n"
         . "\t\t<td>"
         . "Options"
@@ -138,7 +139,7 @@ use JSON;
         . as_code($regex_options . $exec_options)
         . "</td>\n"
         . "\t</tr>\n"
-        
+
         . "\t<tr>\n"
         . "\t\t<td>"
         . "Perl regex object"
@@ -147,7 +148,7 @@ use JSON;
         . as_code('qr/' . escape_slashes($regex_str) . '/' . $regex_options)
         . "</td>\n"
         . "\t</tr>\n";
-        
+
         if (length($regex_options) > 0)
         {
         $html .= "\t<tr>\n"
@@ -159,7 +160,7 @@ use JSON;
         . "</td>\n"
         . "\t</tr>\n";
         }
-        
+
         $html .= "\t<tr>\n"
         . "\t\t<td>"
         . "Perl variable"
@@ -168,9 +169,9 @@ use JSON;
         . as_code($regex_str)
         . "</td>\n"
         . "\t</tr>\n";
-        
+
         $html .= "</table>";
-        
+
         $html .= '<table class="table table-bordered table-striped">'
         . '<thead>'
         . '<th style="text-align:center;">Test</th>'
@@ -188,16 +189,16 @@ use JSON;
         . '</tr>'
         . '</thead>'
         . '<tbody>';
-        
-        my @inputs = $q->param('input');
+
+        my @inputs = $q->multi_param('input');
         my $count = 0;
-        
+
         INPUT:
         for (my $loop = 0; $loop < scalar(@inputs); $loop++) {
             my $input = $inputs[$loop];
-            
+
             next INPUT unless length($input);
-            
+
             $html .= "\t\t<tr>"
             . "\t\t\t<td style=\"text-align:center;\">"
             . ($loop + 1)
@@ -205,7 +206,7 @@ use JSON;
             . "\t\t\t<td>"
             . as_code($input)
             . "</td>";
-            
+
             $html .= "\t\t\t<td>";
             my $var;
             $var = $input =~  $regex   unless $exec_option_g;
@@ -233,10 +234,10 @@ use JSON;
             if ($var) {
                 if ($regex_option_p) {
                     # User specified /p, so presumably is intending to use
-                    # ${^PREMATCH} , ${^MATCH} and ${^POSTMATCH} 
+                    # ${^PREMATCH} , ${^MATCH} and ${^POSTMATCH}
                     $html .= fmt_var( '${^PREMATCH}=',  $before) . "<br/>";
                     $html .= fmt_var( '${^MATCH}='   ,  $during) . "<br/>";
-                    $html .= fmt_var( '${^POSTMATCH}=', $after)  . "<br/>";  
+                    $html .= fmt_var( '${^POSTMATCH}=', $after)  . "<br/>";
                 } else {
                     #$html .= "\$`="      . as_code($before) . "<br/>";
                     #$html .= "\$&amp;="  . as_code($during) . "<br/>";
@@ -248,24 +249,24 @@ use JSON;
             }
             $html .= $named;
             $html .= "</td>";
-            
+
             $html .= "\t\t\t<td>";
             my @results;
             pos($input) = 0;    # Start at the beginning
             @results = $input =~  $regex   unless $exec_option_g;
             @results = $input =~ /$regex/g if     $exec_option_g;
-            for (my $resultLoop = 0; $resultLoop < scalar(@results); $resultLoop++) { 
+            for (my $resultLoop = 0; $resultLoop < scalar(@results); $resultLoop++) {
                 $html .= fmt_var( "\$array[$resultLoop]", $results[$resultLoop]) . '<br/>'
             }
             $html .= "</td>";
-            
+
             $html .= "\t\t\t<td>";
             my @words = split $regex, $input;
             for (my $wordLoop = 0; $wordLoop < scalar(@words); $wordLoop++) {
                 $html .= fmt_var( "[$wordLoop]", $words[$wordLoop]) . "<br/>"
             }
             $html .= "</td>";
-            
+
             $html .= "\t\t\t<td>";
             my $replaced = $input;
             #$replaced =~ s/$regex/$replacement/  unless $exec_option_g;
@@ -291,7 +292,7 @@ use JSON;
                . "</table>\n";
         $data = { "success" => JSON::true, "html" => '<div class="alert alert-warning">' . $msg . '</div>' . $html};
     }
-        
+
     my $body = to_json($data, {'utf8' => 1, 'pretty' => 1});
     my $callback = $q->param('callback');
     if ($callback && length($callback)) {
@@ -320,7 +321,7 @@ sub fmt_var {
     } else{
         $result .= '=' . as_code($var_value);
     }
-    
+
 }
 sub format_version {
     my ($ver) = @_;
@@ -334,7 +335,7 @@ sub has_embedded_code {
     my ($user_supplied_regex) = @_;
     if ($user_supplied_regex =~
           /
-            \( 
+            \(
                 \s* (?: \# [^\n]* \n \s* )* \s* \?
                 \s* (?: \# [^\n]* \n \s* )* \s* [?p]?
                 \s* (?: \# [^\n]* \n \s* )* \s*
@@ -349,7 +350,7 @@ sub has_embedded_code {
 sub escape_slashes {
     my ($txt) = @_;
     $txt =~ s{(?x) (?<!\\)    # not preceding \
-             (                # capture 
+             (                # capture
              (?: \\\\         #     zero or more '\\'
             )*\/              #     /
             )
