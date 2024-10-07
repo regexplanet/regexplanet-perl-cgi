@@ -1,12 +1,29 @@
 #!/bin/bash
+#
+# run via docker
+#
 
-docker build -t regexplanet-perl .
+set -o errexit
+set -o pipefail
+set -o nounset
+
+APP_NAME=regexplanet-perl
+
+docker build \
+	--build-arg COMMIT=$(git rev-parse --short HEAD) \
+	--build-arg LASTMOD=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+	--progress=plain \
+	--tag "${APP_NAME}" \
+	.
+
 docker run \
 	--hostname perl.regexplanet.com \
-	--publish 4000:8080 \
+	--env PORT=4000 \
 	--expose 4000 \
-	--env  PORT='8080' \
-	--env COMMIT=$(git rev-parse --short HEAD) \
-	--env LASTMOD=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+	--interactive \
 	--mount type=bind,source="$(pwd)"/www,destination=/var/www \
-	regexplanet-perl
+	--name "${APP_NAME}" \
+	--publish 4000:4000 \
+	--rm \
+	--tty \
+	"${APP_NAME}"
